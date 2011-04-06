@@ -34,10 +34,9 @@ def svn_path
 end
 
 def git_path
-  path = `git remote -v 2>&1`.slice(/^.*\(push\)/)
+  path = `git branch 2>&1`.slice(/^\*.*$/)
   if path
-    path = path.split(' ')[1].lstrip
-    path = path.sub(/^git@github\.com/,'GH')
+    path = path.split(' ')[1].strip
   end
   path
 end

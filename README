@@ -1,0 +1,17 @@
+This is a custom prompt script.  
+
+It shows the current SVN or git repository information in a nice right-aligned way.
+
+Use it with something like this:
+-----.bashrc-----
+if [ -f $HOME/bin/prompt/prompt.rb ] ; then
+   PS1="\`let RET=\$?; $HOME/bin/prompt/prompt.rb \$RET \$COLUMNS; if [ \$RET = 0 ]; then echo -ne '\\[\\033[01;32m\\]:)'; else echo -ne '\\[\\033[01;31m\\]'; echo -ne \$RET; echo -ne ' :('; fi; echo -n '\\[\\033[00m\\] '\`"
+else
+   if [[ ${EUID} == 0 ]] ; then
+      PS1='\[\033[01;31m\]\h\[\033[01;34m\] \W \$\[\033[00m\] '
+      
+   else
+      PS1='\[\033[01;32m\]\u@\h\[\033[01;34m\] \w \$\[\033[00m\] '
+   fi
+fi
+----------------

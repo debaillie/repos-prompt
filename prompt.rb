@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 #TODO: add git check
 
+trap ("INT") {}
 #formatting
 RED="\033[01;31m"
 GREEN="\033[01;32m"

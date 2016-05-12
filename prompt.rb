@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 #TODO: add git check
 
-trap ("INT") {}
 #formatting
 RED="\033[01;31m"
 GREEN="\033[01;32m"
@@ -12,23 +11,30 @@ YELLOW="\033[01;33m"
 BLUE="\033[0;34m"
 
 #handle arguments
-if ARGV.size != 2
+if ARGV.size != 3
   print "\n"+YELLOW+"> "+NO_FORMAT
   exit -1
 end
 
 $ret_val = ARGV[0].to_i
 $columns = ARGV[1].to_i
-$username = `whoami`.chomp
-$hostname = `hostname`.chomp
-$directory = `pwd`.chomp
+$username = `whoami`.chomp.sub(/^.*\\/,'')
+$hostname = `hostname`.chomp.sub(/\.local$/,'')
+$directory = ARGV[2].to_s.chomp
+$homedir = `echo $HOME`.chomp
 
 $remaining = $columns
 
 def svn_path
-  path = `svn info 2>&1`.slice(/^URL:.*$/)
-  if path
+  info = `svn info 2>&1`
+  path = info.slice(/^URL:.*$/)
+  root = info.slice(/^Repository Root:.*$/)
+  if path and root
+    root = root.split(' ')[2].strip
+    root = root.sub(/[^\/]*\/?$/,'')
+
     path = path.split(' ')[1].lstrip
+    path = path.sub(root,'')
     path = path.sub(/^[^\/]*\/\/[^\/]*\//,'')
   end
   path
@@ -75,7 +81,7 @@ def repos_info
 end
 
 def directory
-  dir = $directory.sub(/^\/home\/#{$username}/, '~')
+  dir = $directory.sub(/^#{$homedir}/, '~')
   $remaining -= dir.length
   LIGHT_BLUE+dir+NO_FORMAT
 end
@@ -94,10 +100,8 @@ def time
   time = 
     if $remaining > (repos_path.length + 14)
       Time.now.strftime(" %m/%d %H:%M") 
-    elsif $remaining > (repos_path.length + 8)
-      Time.now.strftime(" %H:%M") 
-    else
-      ' '
+    else #guarantee time is always displayed
+      Time.now.strftime(" %H:%M ") 
     end
   $remaining -= time.length
   BLUE+time+NO_FORMAT
